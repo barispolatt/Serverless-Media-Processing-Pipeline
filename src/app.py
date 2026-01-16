@@ -69,6 +69,18 @@ def lambda_handler(event, context):
                     Message=f"Warning: Unsafe content detected in {key}. Labels: {labels}",
                     Subject="Content Moderation Alert"
                 )
+            
+            # Write Metadata to DynamoDB
+            table = dynamodb.Table(TABLE_NAME)
+            table.put_item(Item={
+                'image_id': key,
+                'status': 'REJECTED' if unsafe_content else 'PROCESSED',
+                'labels': [l['Name'] for l in labels],
+                'size_bytes': len(image_content)
+            })
+            
+            # Custom Metric: Send the number of processed images to CloudWatch
+            metrics.add_metric(name="ImagesProcessed", unit=MetricUnit.Count, value=1)
         except Exception as e:
             logger.exception("Error processing image")
             raise e
