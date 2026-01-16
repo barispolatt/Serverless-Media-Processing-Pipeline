@@ -24,19 +24,28 @@ SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN")
 @tracer.capture_lambda_handler
 @metrics.log_metrics
 def lambda_handler(event, context):
-    for record in event: # Not: Genelde event['Records'] olur, kodunuza sadık kaldım.
+    for record in event:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         
         logger.info(f"Processing image: {key} from {bucket}")
         
         try:
-            # 1. Resmi S3'ten Çek
+            # Pull image from S3
             response = s3.get_object(Bucket=bucket, Key=key)
-            image_content = response.read() # Boto3 sürümüne göre response['Body'].read() gerekebilir.
+            image_content = response.read() # Boto3 may need response['Body'].read()
             
             logger.info("Image downloaded successfully")
 
+            # Modifiy with Rekognition (Violence/Nudity Scanning)
+            rekog_response = rekognition.detect_moderation_labels(
+                Image={'Bytes': image_content},
+                MinConfidence=70
+            )
+            labels = rekog_response['ModerationLabels']
+            logger.info(f"Rekognition Labels: {json.dumps(labels)}")
+            
+            unsafe_content = len(labels) > 0
         except Exception as e:
             logger.exception("Error processing image")
             raise e
