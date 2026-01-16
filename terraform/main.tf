@@ -63,3 +63,30 @@ resource "aws_iam_role_policy" "lambda_policy" {
     ]
   })
 }
+
+# Lambda Function
+data "archive_file" "lambda_zip" {
+  type        = "zip"
+  source_dir  = "../src" 
+  output_path = "lambda_pkg.zip"
+}
+
+resource "aws_lambda_function" "processor" {
+  filename         = data.archive_file.lambda_zip.output_path
+  function_name    = "${var.project_name}-func"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "app.lambda_handler"
+  runtime          = "python3.9"
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  timeout          = 30
+  memory_size      = 512
+
+  environment {
+    variables = {
+      OUTPUT_BUCKET           = aws_s3_bucket.output.id
+      TABLE_NAME              = aws_dynamodb_table.metadata.name
+      SNS_TOPIC_ARN           = aws_sns_topic.alerts.arn
+      POWERTOOLS_SERVICE_NAME = "media-processor"
+    }
+  }
+}
