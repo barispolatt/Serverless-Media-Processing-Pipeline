@@ -46,6 +46,29 @@ def lambda_handler(event, context):
             logger.info(f"Rekognition Labels: {json.dumps(labels)}")
             
             unsafe_content = len(labels) > 0
+
+            if not unsafe_content:
+                image = Image.open(BytesIO(image_content))
+                image.thumbnail((1024, 1024)) # Resize
+                buffer = BytesIO()
+                image.save(buffer, "JPEG")
+                buffer.seek(0)
+                
+                s3.put_object(
+                    Bucket=OUTPUT_BUCKET,
+                    Key=f"processed/{key}",
+                    Body=buffer,
+                    ContentType='image/jpeg'
+                )
+                logger.info("Image resized and saved.")
+            else:
+                logger.warn("Unsafe content detected! Skipping resize.")
+                # Inform the Admin with SNS
+                sns.publish(
+                    TopicArn=SNS_TOPIC_ARN,
+                    Message=f"Warning: Unsafe content detected in {key}. Labels: {labels}",
+                    Subject="Content Moderation Alert"
+                )
         except Exception as e:
             logger.exception("Error processing image")
             raise e
