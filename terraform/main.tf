@@ -31,3 +31,18 @@ resource "aws_dynamodb_table" "metadata" {
 resource "aws_sns_topic" "alerts" {
   name = "${var.project_name}-alerts"
 }
+
+# IAM Role (Least Privilege)
+resource "aws_iam_role" "lambda_role" {
+  name = "${var.project_name}-role"
+  
+  # DÜZELTME: Assume Role Policy dolduruldu
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+    }]
+  })
+}
