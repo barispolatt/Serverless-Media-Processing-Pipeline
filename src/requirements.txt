@@ -1,3 +1,4 @@
 aws-lambda-powertools
 boto3
 Pillow
+aws-xray-sdk

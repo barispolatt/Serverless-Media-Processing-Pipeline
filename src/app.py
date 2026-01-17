@@ -24,7 +24,7 @@ SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN")
 @tracer.capture_lambda_handler
 @metrics.log_metrics
 def lambda_handler(event, context):
-    for record in event:
+    for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         
