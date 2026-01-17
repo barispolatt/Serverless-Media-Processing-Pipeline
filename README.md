@@ -52,6 +52,7 @@ The pipeline follows an event-driven workflow:
 │   ├── main.tf             # Infrastructure definition
 ├── .gitignore              # Ignored build artifacts
 └── README.md               # Project documentation
+```
 
 ## ⚙️ Setup & Deployment
 
@@ -65,6 +66,7 @@ The pipeline follows an event-driven workflow:
 ```bash
 git clone [https://github.com/YOUR_USERNAME/serverless-media-pipeline.git](https://github.com/YOUR_USERNAME/serverless-media-pipeline.git)
 cd serverless-media-pipeline
+```
 
 ### 2. Install Dependencies (Crucial Step)
 Since AWS Lambda runs on Linux (x86_64) and libraries like Pillow (listed in requirements.txt) rely on C-extensions, we must install platform-specific binaries. If you are developing on macOS or Windows, a standard pip install will result in errors on Lambda.
@@ -77,6 +79,7 @@ pip3 install -r src/requirements.txt -t src/ \
 --only-binary=:all: \
 --upgrade \
 --python-version 3.9
+```
 
 ### 3. Deploy Infrastructure
 Initialize and apply the Terraform configuration.
@@ -85,3 +88,4 @@ Initialize and apply the Terraform configuration.
 cd terraform
 terraform init
 terraform apply
+```
