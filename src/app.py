@@ -33,7 +33,7 @@ def lambda_handler(event, context):
         try:
             # Pull image from S3
             response = s3.get_object(Bucket=bucket, Key=key)
-            image_content = response.read() # Boto3 may need response['Body'].read()
+            image_content = response['Body'].read()
             
             logger.info("Image downloaded successfully")
 
